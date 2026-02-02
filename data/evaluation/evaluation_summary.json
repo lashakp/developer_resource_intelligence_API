@@ -1,0 +1,141 @@
+{
+  "record_count": 1114,
+  "schema_issues": {},
+  "distribution": {
+    "skill_cluster_distribution": {
+      "frontend": 74,
+      "general": 939,
+      "devops": 14,
+      "data": 52,
+      "backend": 34,
+      "mobile": 1
+    },
+    "top_categories": [
+      [
+        "ai",
+        142
+      ],
+      [
+        "design",
+        59
+      ],
+      [
+        "learn",
+        54
+      ],
+      [
+        "icon",
+        47
+      ],
+      [
+        "job",
+        43
+      ],
+      [
+        "editor",
+        39
+      ],
+      [
+        "programming",
+        39
+      ],
+      [
+        "browser",
+        36
+      ],
+      [
+        "marketing",
+        36
+      ],
+      [
+        "library",
+        30
+      ],
+      [
+        "productivity",
+        29
+      ],
+      [
+        "analytics",
+        28
+      ],
+      [
+        "podcast",
+        28
+      ],
+      [
+        "template",
+        28
+      ],
+      [
+        "illustration",
+        23
+      ]
+    ],
+    "top_domains": [
+      [
+        "www.youtube.com",
+        20
+      ],
+      [
+        "github.com",
+        11
+      ],
+      [
+        "www.jetbrains.com",
+        10
+      ],
+      [
+        "learnui.design",
+        5
+      ],
+      [
+        "chromewebstore.google.com",
+        5
+      ],
+      [
+        "chrome.google.com",
+        5
+      ],
+      [
+        "gcore.com",
+        5
+      ],
+      [
+        "www.google.com",
+        3
+      ],
+      [
+        "getcssscan.com",
+        3
+      ],
+      [
+        "www.mozilla.org",
+        3
+      ],
+      [
+        "www.artify.co",
+        3
+      ],
+      [
+        "ahrefs.com",
+        3
+      ],
+      [
+        "venngage.com",
+        2
+      ],
+      [
+        "firebase.google.com",
+        2
+      ],
+      [
+        "dev.to",
+        2
+      ]
+    ],
+    "avg_domain_weight": 1.646,
+    "max_domain_weight": 20
+  },
+  "dominant_domains": {}
+}
