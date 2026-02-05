@@ -90,10 +90,17 @@ def get_recommendations(
     # Filter
     # -----------------------------------------------------
 
-    filtered = [
-        r for r in RESOURCES
-        if r["skill_cluster"].lower() == skill.lower()
-    ]
+    # -----------------------------------------------------
+# Filter
+# -----------------------------------------------------
+
+normalized_skill = skill.strip().lower()
+
+filtered = [
+    r for r in RESOURCES
+    if r["skill_cluster"].lower() == normalized_skill
+]
+
 
     if resource_type:
         filtered = [
