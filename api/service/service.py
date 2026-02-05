@@ -1,12 +1,24 @@
 from typing import List, Dict
 from collections import Counter
+import os
+
+from fastapi import HTTPException
 
 from api.data import RESOURCES
 from api.service.ranking import rank_resource
+from api.service.demo import demo_recommendations
 
 
+# =========================================================
+# Config
+# =========================================================
 
-# ===== Discovery =====
+ENABLE_DEMO = os.getenv("ENABLE_DEMO", "true").lower() == "true"
+
+
+# =========================================================
+# Discovery / Metadata
+# =========================================================
 
 def get_available_skills() -> List[str]:
     return sorted({r["skill_cluster"] for r in RESOURCES})
@@ -16,8 +28,8 @@ def get_available_resource_types() -> List[str]:
     return sorted({r["resource_type"] for r in RESOURCES})
 
 
-def get_filter_availability() -> Dict:
-    availability = {}
+def get_filter_availability() -> Dict[str, List[str]]:
+    availability: Dict[str, set] = {}
     for r in RESOURCES:
         availability.setdefault(r["skill_cluster"], set()).add(r["resource_type"])
     return {k: sorted(v) for k, v in availability.items()}
@@ -29,15 +41,30 @@ def get_available_domains() -> List[Dict]:
 
 
 def get_stats(top_n: int = 5) -> Dict:
+    skill_counts = Counter(r["skill_cluster"] for r in RESOURCES)
+    domain_counts = Counter(r["domain"] for r in RESOURCES)
+    resource_type_counts = Counter(r["resource_type"] for r in RESOURCES)
+
     return {
         "total_resources": len(RESOURCES),
-        "top_skills": Counter(r["skill_cluster"] for r in RESOURCES).most_common(top_n),
-        "top_domains": Counter(r["domain"] for r in RESOURCES).most_common(top_n),
-        "resource_types": Counter(r["resource_type"] for r in RESOURCES).most_common(),
+        "top_skills": [
+            {"skill_cluster": skill, "count": count}
+            for skill, count in skill_counts.most_common(top_n)
+        ],
+        "top_domains": [
+            {"domain": domain, "count": count}
+            for domain, count in domain_counts.most_common(top_n)
+        ],
+        "resource_types": [
+            {"resource_type": rtype, "count": count}
+            for rtype, count in resource_type_counts.most_common()
+        ],
     }
 
 
-# ===== Recommendations =====
+# =========================================================
+# Core Recommendations Logic
+# =========================================================
 
 def get_recommendations(
     skill: str,
@@ -45,33 +72,113 @@ def get_recommendations(
     offset: int = 0,
     resource_type: str | None = None,
     minimum_domain_weight: int | None = None,
+    access_mode: str = "demo",
 ):
-    resources = [r.copy() for r in RESOURCES if r["skill_cluster"] == skill]
+    """
+    Returns ranked recommendations based on access mode.
+
+    demo:
+        - deterministic ranking
+        - capped results
+        - no ML
+    full:
+        - ML ranking when available
+        - full pagination
+    """
+
+    # -----------------------------------------------------
+    # Filter
+    # -----------------------------------------------------
+
+    filtered = [
+        r for r in RESOURCES
+        if r["skill_cluster"].lower() == skill.lower()
+    ]
 
     if resource_type:
-        resources = [r for r in resources if r["resource_type"] == resource_type]
+        filtered = [
+            r for r in filtered
+            if r["resource_type"].lower() == resource_type.lower()
+        ]
 
     if minimum_domain_weight is not None:
-        resources = [r for r in resources if r["domain_weight"] >= minimum_domain_weight]
+        filtered = [
+            r for r in filtered
+            if r["domain_weight"] >= minimum_domain_weight
+        ]
+
+    if not filtered:
+        return {
+            "mode": access_mode,
+            "skill_cluster": skill,
+            "results": [],
+            "count": 0,
+            "total_results": 0,
+            "ranking_mode": None,
+        }
+
+    # -----------------------------------------------------
+    # Rank
+    # -----------------------------------------------------
 
     results = []
     ranking_mode = None
 
-    for r in resources:
-        score, mode = rank_resource(r)
-        r["score"] = score
-        results.append(r)
-        ranking_mode = ranking_mode or mode
+    if access_mode == "full":
+        ranked = []
 
-    results.sort(key=lambda x: x["score"], reverse=True)
+        for r in filtered:
+            score, mode = rank_resource(r)
+            ranking_mode = mode
+
+            r_with_score = r.copy()
+            r_with_score["score"] = score
+
+            ranked.append((r_with_score, score))
+
+        ranked.sort(key=lambda x: x[1], reverse=True)
+        results = [r for r, _ in ranked]
+
+    else:
+        # Demo mode: deterministic, no ML
+        results = sorted(
+            filtered,
+            key=lambda r: (-r["domain_weight"], r["resource_id"])
+        )
+
+        results = [
+            {**r, "score": None}
+            for r in results
+        ]
+
+        ranking_mode = "deterministic"
+
+    # -----------------------------------------------------
+    # Pagination
+    # -----------------------------------------------------
 
     total = len(results)
-    page = results[offset : offset + limit]
+    page = results[offset: offset + limit]
+
+    # -----------------------------------------------------
+    # Demo shaping
+    # -----------------------------------------------------
+
+    if access_mode == "demo":
+        if not ENABLE_DEMO:
+            raise HTTPException(status_code=401, detail="Demo mode disabled")
+
+        return demo_recommendations(page)
+
+    # -----------------------------------------------------
+    # Full response
+    # -----------------------------------------------------
 
     return {
+        "mode": "full",
         "skill_cluster": skill,
         "results": page,
-        "count": total,
+        "count": len(page),
         "total_results": total,
         "ranking_mode": ranking_mode,
     }

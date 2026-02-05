@@ -44,7 +44,63 @@ Use `/v1/skills` to see all available clusters.
 
 ---
 
+It supports two access modes:
 
+Demo – deterministic, safe preview
+
+Full – ML-enhanced when available
+
+Demo Mode (Recommended for First Use)
+/v1/recommendations?skill=data&access_mode=demo
+
+
+Behavior:
+
+Deterministic ranking
+
+No ML dependency
+
+Stable, explainable results
+
+Limited exposure
+
+Ideal for evaluation and sharing
+
+Full Mode
+/v1/recommendations?skill=data&access_mode=full
+
+
+Behavior:
+
+Enables ML ranking when present
+
+Includes numeric scores
+
+Falls back safely if ML is missing
+
+Explicit ranking source reported
+
+Response Transparency
+
+Every response reports:
+
+{
+  "mode": "demo | full",
+  "ranking_mode": "deterministic | ml"
+}
+
+
+No hidden behavior. No silent failures.
+
+Recommended Workflow
+
+Explore with Demo mode
+
+Inspect ranking behavior
+
+Enable Full mode for internal or authenticated usage
+
+Extend ML safely without breaking clients.
 
 \### Resource Type
 
@@ -124,5 +180,9 @@ Domain weight is used in ranking and scoring.
 
 GET /v1/recommendations?skill=data
 
+Final Note
 
+This API is intentionally designed to behave predictably under all conditions.
+
+ML enhances the system — it never controls it.
 

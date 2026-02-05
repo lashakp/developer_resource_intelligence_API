@@ -1,43 +1,125 @@
 Developer Resource Intelligence API
+Overview
 
-A production-ready, explainable recommendation API for curated developer learning resources — combining deterministic scoring with optional ML-based ranking.
+Developer Resource Intelligence API is a production-ready, explainable recommendation backend for curated developer learning resources.
 
-This system is designed to solve developer information overload by enabling structured discovery, transparent ranking, and safe ML extensibility, all exposed through a clean, versioned FastAPI backend.
+It combines:
 
- Why This Project Exists
+Deterministic, transparent ranking (always available)
 
-Developers rely on search engines to find learning resources, but search results are rarely optimized for:
+Optional ML-based ranking (safely enabled when present)
 
-Skill relevance (backend vs data vs devops)
+Explicit Demo vs Full access modes
 
-Learning intent (tools vs documentation vs courses)
+Clean, testable service architecture
 
-Source trustworthiness
+Versioned, well-documented FastAPI endpoints
 
-Explainability of ranking decisions
+The system is intentionally designed to prioritize clarity, predictability, and trust over black-box behavior.
 
-This project addresses those gaps by introducing a controlled, explainable recommendation engine that prioritizes clarity, stability, and extensibility over black-box behavior.
+Why This Project Exists
 
- Core Capabilities
+Developers typically discover learning resources via search engines, which are poorly optimized for:
 
- Skill-based discovery
+Skill relevance (e.g. data vs backend)
 
- Deterministic, explainable ranking
+Learning intent (tools vs docs vs courses)
 
- Optional ML-based ranking with safe fallback
+Source authority and trust
 
- Tested ML vs rule enforcement
+Explainability of why a resource is ranked higher
 
- Clean service-oriented architecture
+This project solves those gaps by providing:
 
- Docker-ready for deployment
+Structured discovery by skill and intent
 
- Fully documented API (Swagger UI)
+Deterministic ranking you can reason about
 
- Key Concepts
+ML enhancement without risking system stability
+
+Clear signals explaining ranking decisions
+
+Core Capabilities
+
+Skill-based resource discovery
+
+Deterministic, explainable ranking (baseline)
+
+Optional ML ranking with enforced fallback
+
+Explicit Demo vs Full access modes
+
+Pagination and filtering
+
+Versioned REST API
+
+Docker-ready deployment
+
+Swagger UI documentation
+
+Demo vs Full Access Model (Key Update)
+Demo Mode (Default)
+
+Designed for public exploration, previews, and safe sharing.
+
+Characteristics:
+
+Uses deterministic ranking only
+
+No ML dependency
+
+Stable, repeatable results
+
+Results may be capped or shaped
+
+score field intentionally omitted or null
+
+Response explicitly reports:
+
+"mode": "demo",
+"ranking_mode": "deterministic"
+
+
+Demo mode allows users to:
+
+Explore the system safely
+
+Understand ranking behavior
+
+Interact with the API without credentials or ML artifacts
+
+Full Mode
+
+Designed for internal use, private deployments, or paid access.
+
+Characteristics:
+
+Enables ML ranking when available
+
+Automatically falls back to deterministic scoring if ML is missing
+
+Includes numeric score values
+
+Full pagination support
+
+Response explicitly reports ranking source:
+
+"mode": "full",
+"ranking_mode": "ml"
+
+
+or
+
+"ranking_mode": "deterministic"
+
+
+Important:
+ML is never silently assumed. The API always tells clients exactly what ranking logic was used.
+
+Key Concepts
 Skill Cluster
 
-High-level developer domains such as:
+High-level developer domains:
 
 backend
 
@@ -51,7 +133,7 @@ mobile
 
 Resource Type
 
-The form of the learning resource:
+The form of the learning material:
 
 tool
 
@@ -61,205 +143,99 @@ course
 
 article
 
+repository
+
 Domain Weight
 
-A heuristic authority score assigned during data enrichment.
+A deterministic authority signal assigned during enrichment.
 
-Higher values indicate more established or trusted domains
+Higher = more trusted / established domain
 
 Used as a primary ranking signal
 
-Fully explainable and deterministic
+Fully explainable and inspectable
 
- Architecture Overview
-
-The system is intentionally decomposed into clear, testable layers:
-
+Architecture Overview
 API (FastAPI)
 │
 ├── Routes        → HTTP interface & validation
 ├── Services      → Business logic orchestration
 ├── Ranking       → ML vs deterministic enforcement
 ├── Scoring       → Transparent heuristic logic
+├── Demo Layer    → Controlled demo output shaping
 ├── ML Layer      → Optional trained model
 ├── Database      → SQLite (read-only, seeded)
 └── ETL Pipeline  → Extract → Transform → Enrich
 
 
-This separation ensures:
+Design Principles:
 
 Predictable behavior
 
-Easy testing
+Explicit control flow
 
 Safe extensibility
 
-Clear ownership of responsibilities
+Clear separation of concerns
 
- API Endpoints
+API Endpoints (v1)
+Health
 
-All endpoints are versioned under /v1.
-
- Health Check
 GET /v1/health
 
+Discovery
 
-Confirms service availability.
-
- Discovery Endpoints
-Available Skills
 GET /v1/skills
 
-Resource Types
 GET /v1/resource-types
 
-Domains
 GET /v1/domains
 
-Dataset Statistics
 GET /v1/stats
 
+Debugging
 
-Provides high-level insight into:
-
-Total resources
-
-Top skills
-
-Top domains
-
-Resource type distribution
-
- Filter Debugging
 GET /v1/debug/availability
 
+Shows valid skill → resource_type combinations.
 
-Shows valid combinations of:
+Recommendations
 
-skill → resource_type
-
-This prevents invalid queries returning empty results unexpectedly.
-
- Recommendations
 GET /v1/recommendations
 
-Required Query Parameters
+Required
 
 skill
 
-Optional Query Parameters
+Optional
 
-limit (pagination)
+limit
 
-offset (pagination)
+offset
 
 resource_type
 
 min_domain_weight
 
-Example
-/v1/recommendations?skill=data&resource_type=tool&min_domain_weight=3
+### Environment Variables
 
- Ranking System
-Deterministic Scoring (Default)
+This project uses environment variables for sensitive configuration.
 
-Every resource is scored using transparent heuristics:
+Required variables:
+- `API_KEY` – Enables full (non-demo) access when provided
 
-Domain authority (domain_weight)
-
-GitHub bonus
-
-Resource type weighting
-
-Properties:
-
-Explainable
-
-Debuggable
-
-Stable
-
-Always available
-
-ML-Based Ranking (Optional)
-
-Lightweight linear ranking model
-
-Loaded lazily at runtime
-
-Automatically enabled when present
-
-Gracefully disabled when missing
-
-The API response explicitly reports which ranking mode was used:
-
-"ranking_mode": "ml"
+Example:
+```bash
+export API_KEY=your_key_here
 
 
-or
+access_mode (demo | full)
 
-"ranking_mode": "deterministic"
+Example:
 
+/v1/recommendations?skill=data&resource_type=tool&access_mode=demo
 
-This avoids silent ML failure — a common production anti-pattern.
-
- Testing Strategy
-
-The system is tested at multiple levels:
-
-Unit Tests
-
-Scoring correctness
-
-Ranking consistency
-
-Integration Tests
-
-ML ranking activation
-
-Deterministic fallback enforcement
-
-Identical API contracts regardless of ranking mode
-
-This guarantees system stability under all conditions.
-
- Database Layer
-
-SQLite used for portability and simplicity
-
-SQLAlchemy ORM
-
-Read-only workload
-
-Database seeded deterministically
-
-The presence of resources.db confirms a complete and operational data layer.
-
- Deployment
-
-The application is fully Dockerized.
-
-docker build -t dev-resource-api .
-docker run -p 8000:8000 dev-resource-api
-
-
-Once running:
-
-API available at http://localhost:8000
-
-Swagger UI available at http://localhost:8000/docs
-
- API Documentation
-
-Swagger UI autogenerated
-
-Rich endpoint descriptions
-
-Example requests included
-
-Human-readable /v1/help endpoint
-
- Tech Stack
+Tech Stack
 
 FastAPI
 
@@ -275,45 +251,12 @@ Docker
 
 Pytest
 
-Joblib (ML model loading)
+Joblib (ML loading)
 
- Project Structure (High Level)
-Developer_Resource_Intelligence/
-├── api/              # FastAPI application
-├── db/               # Database models & seed script
-├── etl/              # Data extraction & enrichment
-├── ml/               # Optional ML ranking
-├── data/             # Raw, processed & enriched datasets
-├── tests/            # Unit & integration tests
-├── Reports/          # Detailed project report
-└── README.md
-
- Future Enhancements
-
-API authentication
-
-User-specific personalization
-
-Caching (Redis)
-
-Advanced ML ranking models
-
-Analytics endpoints
-
-SaaS-grade multi-tenant support
-
- Final Status
-
-This project is:
+Project Status
 
  Production-ready
- Test-covered
+ Fully tested
  Explainable
  ML-extensible
  Portfolio-grade
-
-It demonstrates real-world backend engineering discipline, not just framework usage.
-
- License
-
-MIT License

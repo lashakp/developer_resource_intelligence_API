@@ -15,6 +15,10 @@ from api.service import (
 )
 
 from api.routes import recommendations
+from fastapi.openapi.models import APIKey, APIKeyIn
+from fastapi.security import APIKeyHeader
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 tags_metadata = [
