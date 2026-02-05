@@ -24,7 +24,7 @@ You may optionally filter by resource type or minimum domain weight.
 Some filter combinations may return zero results.
 Use `/v1/debug/availability` to see valid skill → resource_type mappings.
 
-Note: Skill values are case-insensitive (e.g. `data`, `Data`, and `DATA` are treated the same).
+Note: Skill and Resources values are case-insensitive (e.g. `data`, `Data`, and `DATA` are treated the same).
 
 ---
 
