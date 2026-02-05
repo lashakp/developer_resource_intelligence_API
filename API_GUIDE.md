@@ -1,5 +1,11 @@
 \# Developer Resource Intelligence API – Usage Guide
 
+## Live API Access
+
+The API is deployed and publicly accessible.
+
+Interactive documentation:
+https://developerresourceintelligenceapi-production.up.railway.app/docs#/
 
 
 \## Overview

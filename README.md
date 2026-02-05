@@ -1,4 +1,17 @@
 Developer Resource Intelligence API
+
+## Live Deployment
+
+The API is deployed and publicly accessible using Railway.
+
+ **Live API (Swagger UI):**  
+https://developerresourceintelligenceapi-production.up.railway.app/docs#/
+
+The deployed instance supports:
+- Demo mode (no API key required)
+- Full mode with authenticated access
+
+
 Overview
 
 Developer Resource Intelligence API is a production-ready, explainable recommendation backend for curated developer learning resources.
