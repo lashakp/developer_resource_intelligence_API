@@ -191,6 +191,19 @@ Swagger UI enabled
 
 Simple startup
 
+8. Deployment & Production Readiness
+
+The application is containerized using Docker and deployed via Railway.
+
+Deployment characteristics:
+- Cloud-hosted containerized runtime
+- Environment-based configuration (API keys, demo mode)
+- Zero local setup required for reviewers
+- Publicly accessible API endpoint
+
+The deployed API exposes interactive documentation via Swagger UI, enabling real-time exploration of endpoints and ranking behavior.
+
+
 11. Final Outcome
 
 A production-grade backend demonstrating:
