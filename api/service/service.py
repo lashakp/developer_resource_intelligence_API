@@ -90,22 +90,23 @@ def get_recommendations(
     # Filter
     # -----------------------------------------------------
 
-    # -----------------------------------------------------
-# Filter
-# -----------------------------------------------------
+    normalized_skill = skill.strip().lower()
 
-normalized_skill = skill.strip().lower()
+    normalized_resource_type = (
+        resource_type.strip().lower()
+        if resource_type
+        else None
+    )
 
-filtered = [
-    r for r in RESOURCES
-    if r["skill_cluster"].lower() == normalized_skill
-]
+    filtered = [
+        r for r in RESOURCES
+        if r["skill_cluster"].lower() == normalized_skill
+    ]
 
-
-    if resource_type:
+    if normalized_resource_type:
         filtered = [
             r for r in filtered
-            if r["resource_type"].lower() == resource_type.lower()
+            if r["resource_type"].lower() == normalized_resource_type
         ]
 
     if minimum_domain_weight is not None:
