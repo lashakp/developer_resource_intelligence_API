@@ -15,6 +15,13 @@ from api.service.demo import demo_recommendations
 
 ENABLE_DEMO = os.getenv("ENABLE_DEMO", "true").lower() == "true"
 
+# =========================================================
+# Limits
+# =========================================================
+
+DEMO_MAX_RESULTS = 8
+FULL_MAX_RESULTS = 50
+
 
 # =========================================================
 # Discovery / Metadata
@@ -85,6 +92,8 @@ def get_recommendations(
         - ML ranking when available
         - full pagination
     """
+
+    is_demo = access_mode == "demo"
 
     # -----------------------------------------------------
     # Filter
@@ -162,17 +171,21 @@ def get_recommendations(
         ranking_mode = "deterministic"
 
     # -----------------------------------------------------
-    # Pagination
+    # Pagination (authoritative limits)
     # -----------------------------------------------------
 
+    effective_limit = (
+        DEMO_MAX_RESULTS if is_demo else min(limit, FULL_MAX_RESULTS)
+    )
+
     total = len(results)
-    page = results[offset: offset + limit]
+    page = results[offset: offset + effective_limit]
 
     # -----------------------------------------------------
     # Demo shaping
     # -----------------------------------------------------
 
-    if access_mode == "demo":
+    if is_demo:
         if not ENABLE_DEMO:
             raise HTTPException(status_code=401, detail="Demo mode disabled")
 
