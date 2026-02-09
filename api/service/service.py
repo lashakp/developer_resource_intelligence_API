@@ -20,7 +20,7 @@ ENABLE_DEMO = os.getenv("ENABLE_DEMO", "true").lower() == "true"
 # =========================================================
 
 DEMO_MAX_RESULTS = 8
-FULL_MAX_RESULTS = 50
+FULL_MAX_RESULTS = 100
 
 
 # =========================================================
