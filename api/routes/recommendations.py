@@ -31,12 +31,12 @@ Note: Skill and Resource_type values are case-insensitive (e.g. `data`, `Data`, 
 ### Access Modes
 
 🔓 **Demo mode** (no API key)
-- Maximum of 5 results
+- Maximum of 8 results
 - Deterministic (non-ML) ranking
 - Intended for exploration and testing
 
 🔐 **Full mode** (valid API key)
-- Full result set
+- Maximum of 100 results per query
 - ML-based ranking when a trained model is available
 
 Provide your API key using the request header:
